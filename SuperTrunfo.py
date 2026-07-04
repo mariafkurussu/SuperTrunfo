@@ -1,0 +1,297 @@
+import random
+import time
+import os
+
+print("===== SUPER TRUNFO =====")
+time.sleep(1)
+
+print("Vamos jogar Super Trunfo!")
+time.sleep(1)
+
+# LISTA GABARITO DOS ATRIBUTOS
+gabarito = ["Nome", "Força", "Velocidade", "Poder", "Inteligência", "Controle"]
+
+print("\nEscolha o tema:")
+print("1 - Arcane")
+print("2 - Dinossauro")
+
+opcao = input("Digite o número do tema escolhido: ")
+
+while opcao != "1" and opcao != "2":
+    print("Opção inválida. Digite 1 ou 2.")
+    opcao = input("Digite o número do tema escolhido: ")
+
+if opcao == "1":
+    nome_arquivo = "Arcane.txt"
+else:
+    nome_arquivo = "Dinossauro.txt"
+
+
+print("\nEscolha o modo de jogo:")
+print("1 - Jogador contra Jogador")
+print("2 - Jogador contra Máquina")
+
+modo = input("Digite o modo escolhido: ")
+
+while modo != "1" and modo != "2":
+    print("Modo inválido. Digite 1 ou 2.")
+    modo = input("Digite o modo escolhido: ")
+
+
+nome_jogador1 = input("\nDigite o nome do Jogador 1: ")
+
+if modo == "1":
+    nome_jogador2 = input("Digite o nome do Jogador 2: ")
+    dificuldade = "0"
+
+else:
+    nome_jogador2 = "Máquina"
+
+    print("\nEscolha a dificuldade da máquina:")
+    print("1 - Fácil")
+    print("2 - Normal")
+    print("3 - Difícil")
+
+    dificuldade = input("Digite a dificuldade: ")
+
+    while dificuldade != "1" and dificuldade != "2" and dificuldade != "3":
+        print("Dificuldade inválida. Digite 1, 2 ou 3.")
+        dificuldade = input("Digite a dificuldade: ")
+
+
+cartas = []
+
+# Caminho da pasta onde o código está salvo
+pasta_atual = os.path.dirname(os.path.abspath(__file__))
+caminho_arquivo = os.path.join(pasta_atual, nome_arquivo)
+
+arquivo = open(caminho_arquivo, "r", encoding="utf-8")
+
+for linha in arquivo:
+    linha = linha.strip()
+
+    if linha != "":
+        dados = linha.split(",")
+
+        carta = []
+        carta.append(dados[0])
+
+        for i in range(1, len(dados)):
+            if dados[i] != "":
+                carta.append(int(dados[i]))
+
+        cartas.append(carta)
+
+arquivo.close()
+
+
+def mostrar_carta(carta):
+    print("\n========================")
+    print(f"{gabarito[0]}: {carta[0]}")
+
+    for i in range(1, len(gabarito)):
+        print(f"{i} - {gabarito[i]}: {carta[i]}")
+
+
+def contador(lista):
+    return len(lista)
+
+
+def escolher_atributo_jogador():
+    print("\nEscolha um atributo:")
+
+    for i in range(1, len(gabarito)):
+        print(f"{i} - {gabarito[i]}")
+
+    escolha = input("\nDigite: ")
+
+    while escolha != "1" and escolha != "2" and escolha != "3" and escolha != "4" and escolha != "5":
+        print("Atributo inválido. Escolha um número de 1 a 5.")
+        escolha = input("Digite: ")
+
+    return int(escolha)
+
+
+def escolher_atributo_maquina(carta, dificuldade):
+
+    if dificuldade == "1":
+        atributo = random.randint(1, 5)
+
+    elif dificuldade == "2":
+        atributos_sorteados = random.sample([1, 2, 3, 4, 5], 3)
+
+        melhor_atributo = atributos_sorteados[0]
+
+        for atributo_atual in atributos_sorteados:
+            if carta[atributo_atual] > carta[melhor_atributo]:
+                melhor_atributo = atributo_atual
+
+        atributo = melhor_atributo
+
+    else:
+        melhor_atributo = 1
+
+        for atributo_atual in range(1, 6):
+            if carta[atributo_atual] > carta[melhor_atributo]:
+                melhor_atributo = atributo_atual
+
+        atributo = melhor_atributo
+
+    return atributo
+
+
+random.shuffle(cartas)
+
+meio = len(cartas) // 2
+
+jogador1 = cartas[:meio]
+jogador2 = cartas[meio:]
+
+vez = 1
+monte_espera = []
+
+
+while len(jogador1) > 0 and len(jogador2) > 0:
+
+    print("\n################################")
+    time.sleep(1)
+
+    if vez == 1:
+        carta_atual = jogador1[0]
+        carta_adversario = jogador2[0]
+        nome_atual = nome_jogador1
+        nome_adversario = nome_jogador2
+
+    else:
+        carta_atual = jogador2[0]
+        carta_adversario = jogador1[0]
+        nome_atual = nome_jogador2
+        nome_adversario = nome_jogador1
+
+    print(f"\nCARTA DE {nome_atual}")
+    mostrar_carta(carta_atual)
+
+    if modo == "2" and vez == 2:
+        atributo = escolher_atributo_maquina(carta_atual, dificuldade)
+        print(f"\nA máquina escolheu: {gabarito[atributo]}")
+
+    else:
+        atributo = escolher_atributo_jogador()
+
+    valor_atual = carta_atual[atributo]
+    valor_adversario = carta_adversario[atributo]
+
+    time.sleep(1)
+
+    print(f"\nCARTA DE {nome_adversario}")
+    mostrar_carta(carta_adversario)
+
+    print("\n========================")
+    print(f"Atributo escolhido: {gabarito[atributo]}")
+    print(f"{nome_atual}: {valor_atual}")
+    print(f"{nome_adversario}: {valor_adversario}")
+
+    time.sleep(1)
+
+    if valor_atual > valor_adversario:
+
+        print(f"\n>>> {nome_atual} VENCEU A RODADA! <<<")
+
+        if vez == 1:
+            carta_vencedor = jogador1.pop(0)
+            carta_perdedor = jogador2.pop(0)
+
+            jogador1.append(carta_vencedor)
+            jogador1.append(carta_perdedor)
+
+            for carta in monte_espera:
+                jogador1.append(carta)
+
+            monte_espera = []
+            vez = 1
+
+        else:
+            carta_vencedor = jogador2.pop(0)
+            carta_perdedor = jogador1.pop(0)
+
+            jogador2.append(carta_vencedor)
+            jogador2.append(carta_perdedor)
+
+            for carta in monte_espera:
+                jogador2.append(carta)
+
+            monte_espera = []
+            vez = 2
+
+    elif valor_adversario > valor_atual:
+
+        print(f"\n>>> {nome_adversario} VENCEU A RODADA! <<<")
+
+        if vez == 1:
+            carta_vencedor = jogador2.pop(0)
+            carta_perdedor = jogador1.pop(0)
+
+            jogador2.append(carta_vencedor)
+            jogador2.append(carta_perdedor)
+
+            for carta in monte_espera:
+                jogador2.append(carta)
+
+            monte_espera = []
+            vez = 2
+
+        else:
+            carta_vencedor = jogador1.pop(0)
+            carta_perdedor = jogador2.pop(0)
+
+            jogador1.append(carta_vencedor)
+            jogador1.append(carta_perdedor)
+
+            for carta in monte_espera:
+                jogador1.append(carta)
+
+            monte_espera = []
+            vez = 1
+
+    else:
+
+        print("\n>>> EMPATE! <<<")
+        print("As cartas foram para o monte de espera.")
+        print("Quem vencer a próxima rodada leva também essas cartas.")
+
+        monte_espera.append(jogador1.pop(0))
+        monte_espera.append(jogador2.pop(0))
+
+    print(f"\nCartas de {nome_jogador1}: {contador(jogador1)}")
+    print(f"Cartas de {nome_jogador2}: {contador(jogador2)}")
+    print(f"Cartas no monte de espera: {contador(monte_espera)}")
+
+    time.sleep(2)
+
+
+print("\n===================================")
+
+if len(jogador1) > 0:
+    print(f"\n>>> {nome_jogador1} VENCEU O JOGO! <<<")
+    vencedor = nome_jogador1
+
+else:
+    print(f"\n>>> {nome_jogador2} VENCEU O JOGO! <<<")
+    vencedor = nome_jogador2
+
+
+caminho_ranking = os.path.join(pasta_atual, "ranking.txt")
+
+arquivo = open(caminho_ranking, "a", encoding="utf-8")
+arquivo.write(vencedor + "\n")
+arquivo.close()
+
+
+print("\n===== RANKING =====")
+
+arquivo = open(caminho_ranking, "r", encoding="utf-8")
+
+for linha in arquivo:
+    print(linha.strip())
+
+arquivo.close()
